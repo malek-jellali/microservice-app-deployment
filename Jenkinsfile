@@ -13,7 +13,7 @@ pipeline {
                 }
             }
             steps {
-                git 'https://github.com/Fares-Rbd/IGL5-G4-timesheet.git'
+                git 'https://github.com/malek-jellali/microservice-app-deployment.git'
             }
         }
 
