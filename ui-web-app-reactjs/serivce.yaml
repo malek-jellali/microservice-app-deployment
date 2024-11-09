@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "react-ui"
+  namespace: microservices
+spec:
+  selector:
+    app: "react-ui"
+  type: NodePort
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: "react-ui"
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
