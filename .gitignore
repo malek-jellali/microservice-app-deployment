@@ -1,0 +1,25 @@
+# Ignore Terraform files
+
+# Ignore local Terraform state
+*.tfstate
+*.tfstate.*
+
+# Ignore crash logs
+crash.log
+
+# Ignore any variable files with sensitive information
+*.tfvars
+*.tfvars.json
+
+# Ignore Terraform plan files
+*.tfplan
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Ignore Terraform working directory
+.terraform/
+
+# For TFS, if you have specific local configurations or environment files:
+*.env
