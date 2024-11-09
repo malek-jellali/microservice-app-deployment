@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "wishlist"
+  namespace: ms
+  labels:
+    app: "wishlist"
+spec:
+  selector:
+    matchLabels:
+      app: "wishlist"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "wishlist"
+    spec:
+      containers:
+      - name: "wishlist"
+        image: malekjellali1/wishlist:latest
+        resources:
+        ports:
+        - containerPort: 5000
+          name: "wishlist"

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "shoe"
+  namespace: ms
+  labels:
+    app: "shoe"
+spec:
+  selector:
+    matchLabels:
+      app: "shoe"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "shoe"
+    spec:
+      containers:
+      - name: "shoe"
+        image: malekjellali1/shoes:latest
+        resources:
+        ports:
+        - containerPort: 1002
+          name: "shoe"

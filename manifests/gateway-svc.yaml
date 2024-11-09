@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "zuul-service"
+  namespace: ms
+spec:
+  selector:
+    app: "zuul-api-gateway"
+  type: NodePort
+  ports:
+  - name: "zuul-service"
+    port: 9999
+    targetPort: 9999
+    nodePort: 32470

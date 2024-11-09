@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wishlist
+  namespace: ms
+spec:
+  selector:
+    app: "wishlist"
+  type: ClusterIP
+  ports:
+  - name: wishlist
+    port: 1003
+    targetPort: 5000

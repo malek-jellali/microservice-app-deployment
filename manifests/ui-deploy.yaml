@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-ui
+  namespace: ms
+  labels:
+    app: react-ui
+spec:
+  selector:
+    matchLabels:
+      app: react-ui
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: react-ui
+    spec:
+      containers:
+      - name: react-ui
+        image: malekjellali1/react-ui:latest
+        ports:
+        - containerPort: 8080
+          name: react-ui
