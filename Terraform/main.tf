@@ -106,8 +106,8 @@ resource "aws_security_group" "microservices_public_node_sg" {
   }
 
   ingress {
-    from_port   = 80  # Allow HTTP
-    to_port     = 80
+    from_port   = 8080  # Allow HTTP
+    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]  # Allow from anywhere
   }
