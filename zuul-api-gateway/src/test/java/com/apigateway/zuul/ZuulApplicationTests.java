@@ -2,9 +2,11 @@ package com.apigateway.zuul;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
 
 @SpringBootTest
-@TestPropertySource(properties = "eureka.client.enabled=false")
+@ActiveProfiles("test")
 class ZuulApplicationTests {
 
 	@Test
