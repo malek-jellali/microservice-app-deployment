@@ -1,62 +1,46 @@
 pipeline {
-    tools {
-        python 'Python 3.11.2'  // Make sure Python is installed in Jenkins with the correct version.
-    }
-    
     environment {
-        repository = 'malekjellali1/wishlist'
-        microservice = "${repository}:latest"  // Docker image name with the 'latest' tag
+        repository = 'malekjellali1/cart'
+        setupFile = '/var/jenkins_home/setup_complete.txt'
+        microservice = "${repository}:latest" 
     }
 
     agent any
 
     stages {
-        stage('CHECKOUT GIT') {
+        stage('Wait for Setup Completion') {
             steps {
-                git 'https://github.com/malek-jellali/microservice-app-deployment.git'
-            }
-        }
-
-        stage('SETUP VIRTUAL ENVIRONMENT') {
-            steps {
-                sh 'python3 -m venv venv'
-                sh '. venv/bin/activate'
-            }
-        }
-
-        stage('INSTALL DEPENDENCIES') {
-            steps {
-                echo 'Installing Python dependencies...'
-                sh '. venv/bin/activate && pip install -r requirements.txt'
-            }
-        }
-
-        stage('LINT CODE') {
-            steps {
-                echo 'Running flake8 to check code quality...'
-                sh '. venv/bin/activate && flake8 .'  // Assuming flake8 is listed in requirements.txt
-            }
-        }
-
-        stage('RUN UNIT TESTS') {
-            steps {
-                echo 'Running unit tests with coverage...'
-                sh '. venv/bin/activate && pytest --cov=. tests/'  // Assuming pytest and pytest-cov are in requirements.txt
-            }
-        }
-
-        stage('EXECUTE SONARQUBE ANALYSIS') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'sonar-cred', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PASS')]) {
-                    sh 'sonar-scanner -Dsonar.projectKey=python-app -Dsonar.host.url=http://sonarqube:9000 -Dsonar.login=$SONAR_USER'
+                script {
+                    retry(10) {
+                        if (!fileExists("${env.setupFile}")) {
+                            echo "Setup not complete. Waiting..."
+                            sleep(30)
+                            error("Setup not completed yet.")
+                        } else {
+                            echo "Setup complete. Proceeding with build."
+                        }
+                    }
                 }
             }
         }
 
+        stage('CHECKOUT GIT') {
+            steps {
+                git(
+                    branch: 'wishlist-microservice-python',
+                    url: 'https://github.com/malek-jellali/microservice-app-deployment.git',
+                    credentialsId: 'github-cred'
+                )
+            }
+        }
+       
+
         stage('BUILD DOCKER IMAGE') {
             steps {
                 script {
-                    dockerImage = docker.build("${microservice}")
+                    dir('wishlist-microservice-python') {
+                        dockerImage = docker.build("${microservice}")
+                    }
                 }
             }
         }
