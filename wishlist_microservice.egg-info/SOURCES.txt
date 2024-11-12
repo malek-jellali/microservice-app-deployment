@@ -1,0 +1,7 @@
+setup.py
+wishlist-microservice-python/__init__.py
+wishlist-microservice-python/index.py
+wishlist_microservice.egg-info/PKG-INFO
+wishlist_microservice.egg-info/SOURCES.txt
+wishlist_microservice.egg-info/dependency_links.txt
+wishlist_microservice.egg-info/top_level.txt
