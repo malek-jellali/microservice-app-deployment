@@ -1,0 +1,76 @@
+// styles/styles.scss
+
+// Define some colors using variables
+$dark-blue: #003366;  // Dark blue for header and buttons
+$blue: #1E90FF;       // Lighter blue for the API URL
+$red: #FF6347;        // Red for error messages
+
+// Global styles
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+header {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background-color: $dark-blue;  // Dark blue instead of yellow
+  color: white;
+  text-align: center;
+
+  h1 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .subheading {
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;  // Centers the buttons horizontally
+  align-items: center;      // Centers the buttons vertically if needed
+  gap: 15px;                // Adds space between the buttons
+  margin-top: 2rem;         // Adds top margin to the button container
+}
+
+button {
+  padding: 10px 20px;
+  background-color: $dark-blue;  // Dark blue for buttons
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+
+  &:hover {
+    background-color: darken($dark-blue, 10%);
+  }
+}
+
+.response-container {
+  text-align: center;
+  margin-top: 2rem;
+
+  .api-url {
+    color: $blue;
+    font-size: 18px;
+  }
+
+  .error-message {
+    color: $red;
+  }
+}
+
+.pt4 {
+  padding-top: 2rem;
+}
+
+.pb1 {
+  padding-bottom: 1rem;
+}
