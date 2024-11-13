@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import './styles/styles.scss';  // Ensure you have the correct path to your SCSS file
+import React, { useState, useEffect } from 'react';
+import './styles/styles.scss';
 
 const App = () => {
   const [response, setResponse] = useState(null);
@@ -7,10 +7,26 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState({ url: '' });
 
+  // This function can be used to fetch geolocation details or any other details needed when the component loads
+  const getUserGeolocationDetails = () => {
+    fetch("/myip")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setDisplayData(data.url);
+      });
+  };
+
+  useEffect(() => {
+    getUserGeolocationDetails();
+  }, []);
+
   const handleApiCall = async (e) => {
-    const url = 'http://localhost:30200/' + e.target.name;
+    // Dynamically construct the URL using 'details' as the host and '32470' as the port, followed by the target name
+    let url = `http://'+ details + ':30200/' +${e.target.name}`;
     setDisplayData({ url });
     let options = {};
+
     try {
       setLoading(true);
       const res = await fetch(url, options);
@@ -33,7 +49,6 @@ const App = () => {
         <div className="subheading">Simple Microservice Application</div>
       </header>
       <div className="pt4 pb1">
-        {/* Button container for centering */}
         <div className="button-container">
           <button name="shoe/shoes" onClick={handleApiCall}>Shoes</button>
           <button name="offer/offers" onClick={handleApiCall}>Offers</button>
