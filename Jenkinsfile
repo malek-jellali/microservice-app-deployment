@@ -4,7 +4,7 @@ pipeline {
     }
     
     environment {
-        repository = 'malekjellali1/cart'
+        repository = 'malekjellali1/react-ui'
         microservice = "${repository}:latest"  // Set up the image name with tag 'latest'
         setupFile = '/var/jenkins_home/setup_complete.txt'  // Path to the setup flag file inside the Jenkins container
     }

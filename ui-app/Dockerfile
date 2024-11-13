@@ -1,13 +1,22 @@
-FROM node:8
+
+FROM node:18-alpine
 
 
 WORKDIR /app
+
+
+COPY package*.json ./
+
+RUN npm install --production
+
+
 COPY . .
 
-RUN npm install express
-RUN npm install
+
+ENV PORT=8080
+
 
 EXPOSE 8080
 
-#Runs in development Mode
+
 CMD ["npm", "start"]
