@@ -11,4 +11,4 @@ spec:
   - name: "zuul-service"
     port: 9999
     targetPort: 9999
-    nodePort: 32470
+    nodePort: 30200
