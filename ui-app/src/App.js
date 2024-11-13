@@ -23,7 +23,7 @@ const App = () => {
 
   const handleApiCall = async (e) => {
     // Dynamically construct the URL using 'details' as the host and '32470' as the port, followed by the target name
-    let url = `http://'+ details + ':30200/' +${e.target.name}`;
+    let url = `http://details:32470/${e.target.name}`;
     setDisplayData({ url });
     let options = {};
 
