@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "offer"
+  name: "cart"
   namespace: ms
   labels:
-    app: "offer"
+    app: "cart"
 spec:
   selector:
     matchLabels:
-      app: "offer"
+      app: "cart"
   replicas: 1
   template:
     metadata:
       labels:
-        app: "offer"
+        app: "cart"
     spec:
       containers:
-      - name: "offer"
-        image: malekjellali1/offer:latest
+      - name: "cart"
+        image: malekjellali1/cart:latest
         resources:
         ports:
         - containerPort: 1004
-          name: "offer"
+          name: "cart"

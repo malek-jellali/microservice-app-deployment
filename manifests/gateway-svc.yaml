@@ -5,7 +5,7 @@ metadata:
   namespace: ms
 spec:
   selector:
-    app: "zuul-api-gateway"
+    app: "api-gateway"
   type: NodePort
   ports:
   - name: "zuul-service"

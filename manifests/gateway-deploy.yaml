@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "zuul-api-gateway"
+  name: "api-gateway"
   namespace: ms
   labels:
-    app: "zuul-api-gateway"
+    app: "api-gateway"
 spec:
   selector:
     matchLabels:
-      app: "zuul-api-gateway"
+      app: "api-gateway"
   replicas: 1
   template:
     metadata:
       labels:
-        app: "zuul-api-gateway"
+        app: "api-gateway"
     spec:
       containers:
-      - name: "zuul-api-gateway"
+      - name: "api-gateway"
         image: malekjellali1/api-gateway:latest
         ports:
         - containerPort: 9999
-          name: "zuul-api-gateway"
+          name: "api-gateway"
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
