@@ -8,7 +8,7 @@ const App = () => {
   const [displayData, setDisplayData] = useState({ url: '' });
 
   const handleApiCall = async (e) => {
-    const url = `http://18.213.245.237:9999/${e.target.name}`; // Static IP-based URL for API calls
+    const url = `http://18.213.245.237:30200/${e.target.name}`; // Static IP-based URL for API calls
     setDisplayData({ url });
 
     try {
