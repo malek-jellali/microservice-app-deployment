@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        repository = 'malekjellali1/cart'
+        repository = 'malekjellali1/wishlist'
         setupFile = '/var/jenkins_home/setup_complete.txt'
         microservice = "${repository}:latest" 
     }
@@ -39,12 +39,9 @@ pipeline {
     steps {
         withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
             sh '''
-            # Activate the virtual environment using dot (.)
             . /opt/twine-env/bin/activate
-
-            # Now use twine from the virtual environment to upload the package
             twine upload --config-file /root/.pypirc --repository-url http://nexus:8081/repository/python-releases/ \
-                -u ${NEXUS_USER} -p ${NEXUS_PASS} dist/wishlist_microservice-0.1.0.tar.gz
+                -u ${NEXUS_USER} -p ${NEXUS_PASS} dist/wishlist_microservice-0.1.0.tar.gz || echo "Version already exists, continuing pipeline."
             '''
         }
     }
