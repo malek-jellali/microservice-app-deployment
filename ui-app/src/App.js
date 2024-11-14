@@ -8,18 +8,22 @@ const App = () => {
   const [displayData, setDisplayData] = useState({ url: '' });
 
   const handleApiCall = async (e) => {
-    const url = `http://18.213.245.237:30200/${e.target.name}`; // Static IP-based URL for API calls
-    setDisplayData({ url });
+    const url = `http://54.157.108.61:9999/${e.target.name}`; // Static IP-based URL for API calls
+    setDisplayData({ url });  // Ensure this updates displayData state
 
     try {
       setLoading(true);
       const res = await fetch(url);
+      
+      if (!res.ok) { // Check for a failed response (non-2xx status code)
+        throw new Error(`Error ${res.status}: ${res.statusText}`);
+      }
+      
       const json = await res.json();
       setResponse(json);
       setError(null);
     } catch (err) {
-      setLoading(false);
-      setError(err);
+      setError(err.message);
       setResponse(null);
     } finally {
       setLoading(false);
@@ -41,6 +45,7 @@ const App = () => {
         </div>
         <br />
         <div className="response-container">
+          {loading && <p>Loading...</p>}
           {response && (
             <>
               <p>API hit through API Gateway to <span className="api-url">{displayData.url}</span></p>
@@ -57,7 +62,7 @@ const App = () => {
               <p>API hit through API Gateway to <span className="api-url">{displayData.url}</span></p>
               <br />
               <p>--Error--</p>
-              <div className="error-message">{JSON.stringify(error)}</div>
+              <div className="error-message">{error}</div>
               <p>Probably one of the microservices is down</p>
             </>
           )}
