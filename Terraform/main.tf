@@ -83,6 +83,11 @@ resource "aws_security_group" "microservices_public_node_sg" {
     protocol        = "tcp" 
   }
    ingress {
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp" 
+  }
+   ingress {
     from_port       = 9090
     to_port         = 9090
     protocol        = "tcp" 
@@ -106,8 +111,8 @@ resource "aws_security_group" "microservices_public_node_sg" {
   }
 
   ingress {
-    from_port   = 8082  # Allow HTTP
-    to_port     = 8082
+    from_port   = 8080  # Allow HTTP
+    to_port     = 8084
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]  # Allow from anywhere
   }
