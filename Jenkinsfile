@@ -6,54 +6,86 @@ pipeline {
     
     environment {
         repository = 'malekjellali1/server'
-        microservice = "${repository}:latest"
+        gatewayImage = "${repository}:latest"
+        setupFile = '/var/jenkins_home/setup_complete.txt'  // Path to the setup flag file inside the Jenkins container
     }
-
+    
     agent any
 
     stages {
+        stage('Wait for Setup Completion') {
+            steps {
+                script {
+                    retry(10) {
+                        if (!fileExists("${env.setupFile}")) {
+                            echo "Setup not complete. Waiting..."
+                            sleep(30)
+                            error("Setup not completed yet.")
+                        } else {
+                            echo "Setup complete. Proceeding with build."
+                        }
+                    }
+                }
+            }
+        }
+
+      
         stage('CHECKOUT GIT') {
             steps {
-                git 'https://github.com/malek-jellali/microservice-app-deployment.git'
+                git(
+                    branch: 'eureka-discovery-server',
+                    url: 'https://github.com/malek-jellali/microservice-app-deployment.git',
+                    credentialsId: 'github-cred'
+                )
             }
         }
 
         stage('MVN CLEAN') {
             steps {
-                sh 'mvn clean'
+                dir('eureka-discovery-server') {
+                    sh 'mvn clean'
+                }
             }
         }
 
         stage('ARTIFACT CONSTRUCTION') {
             steps {
-                echo 'ARTIFACT CONSTRUCTION...'
-                sh 'mvn package -Dmaven.test.skip=true -P test-coverage'
+                dir('eureka-discovery-server') {
+                    echo 'Building Artifact...'
+                    sh 'mvn package -P test-coverage'
+                }
             }
         }
 
         stage('UNIT TESTS') {
             steps {
-                echo 'Launching Unit Tests...'
-                sh 'mvn test'
+                dir('eureka-discovery-server') {
+                    echo 'Launching Unit Tests...'
+                    sh 'mvn test'
+                }
             }
         }
 
         stage('EXECUTE SONARQUBE ANALYSIS') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'sonar-cred', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PASS')]) {
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=docker-spring-boot -Dsonar.host.url=http://sonarqube:9000 -Dsonar.login=$SONAR_USER -Dsonar.password=$SONAR_PASS'
+                dir('eureka-discovery-server') {
+                    withCredentials([usernamePassword(credentialsId: 'sonar-cred', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PASS')]) {
+                        sh 'mvn sonar:sonar -Dsonar.projectKey=docker-spring-boot -Dsonar.host.url=http://sonarqube:9000 -Dsonar.login=$SONAR_USER'
+                    }
                 }
             }
         }
 
         stage('PUBLISH TO NEXUS') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                    sh '''
-                    mvn deploy --settings /var/jenkins_home/.m2/settings.xml \\
-                        -DaltDeploymentRepository=deploymentRepo::default::http://nexus:8081/repository/maven-releases/ \\
-                        -Dusername=${NEXUS_USER} -Dpassword=${NEXUS_PASS}
-                    '''
+                dir('eureka-discovery-server') {
+                    withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                        sh '''
+                        mvn deploy --settings /var/jenkins_home/.m2/settings.xml \\
+                            -DaltDeploymentRepository=deploymentRepo::default::http://nexus:8081/repository/maven-releases/ \\
+                            -Dusername=${NEXUS_USER} -Dpassword=${NEXUS_PASS}
+                        '''
+                    }
                 }
             }
         }
@@ -61,8 +93,9 @@ pipeline {
         stage('BUILD DOCKER IMAGE') {
             steps {
                 script {
-                    // Build Docker image and tag it with the latest version
-                    dockerImage = docker.build("${microservice}")
+                    dir('eureka-discovery-server') {
+                        dockerImage = docker.build("${env.microservice}")
+                    }
                 }
             }
         }
@@ -71,12 +104,11 @@ pipeline {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker-cred', url: 'https://index.docker.io/v1/') {
-                        // Push both latest and BUILD_NUMBER tags if required
                         dockerImage.push("latest")
                         dockerImage.push("${env.BUILD_NUMBER}")
                     }
                 }
             }
         }
-    } // End of stages block
-} // End of pipeline block
+    }
+}
