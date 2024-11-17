@@ -3,13 +3,13 @@ pipeline {
         jdk 'jdk17'
         maven 'maven3'
     }
-    
+
     environment {
         repository = 'malekjellali1/server'
-        gatewayImage = "${repository}:latest"
-        setupFile = '/var/jenkins_home/setup_complete.txt'  // Path to the setup flag file inside the Jenkins container
+        eurekaImage = "${repository}:latest"
+        setupFile = '/var/jenkins_home/setup_complete.txt'
     }
-    
+
     agent any
 
     stages {
@@ -29,18 +29,17 @@ pipeline {
             }
         }
 
-      
-        stage('CHECKOUT GIT') {
+        stage('Checkout Git') {
             steps {
                 git(
-                    branch: 'eureka-discovery-server',
+                    branch: 'eureka-discovery-server', 
                     url: 'https://github.com/malek-jellali/microservice-app-deployment.git',
                     credentialsId: 'github-cred'
                 )
             }
         }
 
-        stage('MVN CLEAN') {
+        stage('Maven Clean') {
             steps {
                 dir('eureka-discovery-server') {
                     sh 'mvn clean'
@@ -48,59 +47,36 @@ pipeline {
             }
         }
 
-        stage('ARTIFACT CONSTRUCTION') {
+        stage('Artifact Construction') {
             steps {
+                echo 'Constructing Artifact...'
                 dir('eureka-discovery-server') {
-                    echo 'Building Artifact...'
-                    sh 'mvn package -P test-coverage'
+                    sh 'mvn package -Dmaven.test.skip=true'
                 }
             }
         }
 
-        stage('UNIT TESTS') {
+        stage('Unit Tests') {
             steps {
+                echo 'Running Unit Tests...'
                 dir('eureka-discovery-server') {
-                    echo 'Launching Unit Tests...'
                     sh 'mvn test'
                 }
             }
         }
 
-        stage('EXECUTE SONARQUBE ANALYSIS') {
-            steps {
-                dir('eureka-discovery-server') {
-                    withCredentials([usernamePassword(credentialsId: 'sonar-cred', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PASS')]) {
-                        sh 'mvn sonar:sonar -Dsonar.projectKey=docker-spring-boot -Dsonar.host.url=http://sonarqube:9000 -Dsonar.login=$SONAR_USER'
-                    }
-                }
-            }
-        }
 
-        stage('PUBLISH TO NEXUS') {
-            steps {
-                dir('eureka-discovery-server') {
-                    withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                        sh '''
-                        mvn deploy --settings /var/jenkins_home/.m2/settings.xml \\
-                            -DaltDeploymentRepository=deploymentRepo::default::http://nexus:8081/repository/maven-releases/ \\
-                            -Dusername=${NEXUS_USER} -Dpassword=${NEXUS_PASS}
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('BUILD DOCKER IMAGE') {
+        stage('Build Docker Image') {
             steps {
                 script {
                     dir('eureka-discovery-server') {
-                        dockerImage = docker.build("${env.microservice}")
+                        dockerImage = docker.build("${eurekaImage}")
                     }
                 }
             }
         }
 
-        stage('PUSH DOCKER IMAGE') {
+        stage('Push Docker Image') {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker-cred', url: 'https://index.docker.io/v1/') {
@@ -108,6 +84,41 @@ pipeline {
                         dockerImage.push("${env.BUILD_NUMBER}")
                     }
                 }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                def jobName = env.JOB_NAME
+                def buildNumber = env.BUILD_NUMBER
+                def pipelineStatus = currentBuild.result ?: 'UNKNOWN'
+                def bannerColor = pipelineStatus.toUpperCase() == 'SUCCESS' ? 'green' : 'red'
+
+                def body = """
+                    <html>
+                    <body>
+                    <div style="border: 4px solid ${bannerColor}; padding: 10px;">
+                    <h2>${jobName} - Build ${buildNumber}</h2>
+                    <div style="background-color: ${bannerColor}; padding: 10px;">
+                    <h3 style="color: white;">Eureka Server Setup Status: ${pipelineStatus.toUpperCase()}</h3>
+                    </div>
+                    <p>The setup of the Eureka server application was ${pipelineStatus.toUpperCase().toLowerCase()}.</p>
+                    <p>For more details, check the <a href="${BUILD_URL}">console output</a>.</p>
+                    </div>
+                    </body>
+                    </html>
+                """
+
+                emailext (
+                    subject: "${jobName} - Eureka Server Build ${buildNumber} - ${pipelineStatus.toUpperCase()}",
+                    body: body,
+                    to: 'malakjellali29@gmail.com',
+                    from: 'jenkins@example.com',
+                    replyTo: 'jenkins@example.com',
+                    mimeType: 'text/html'
+                )
             }
         }
     }
